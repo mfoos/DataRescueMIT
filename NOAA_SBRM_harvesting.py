@@ -27,7 +27,7 @@ for result in section:
 
 for url in urllist:
     filename = url.split("/")[-1]
-    if not os.path.isfile(filename):
+    if not os.path.isfile(filename.replace(" ","%20")):
         time.sleep(1)
         if url[-3:] == "pdf":
             response = requests.get(url)
