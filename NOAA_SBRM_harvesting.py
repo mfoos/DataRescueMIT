@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import time
+import wget
+import os
 
 baseURL = "http://www.nefsc.noaa.gov/femad/fsb/SBRM"
 html = urlopen(baseURL)
@@ -23,15 +25,40 @@ for result in section:
             url = baseURL + "/" + url
         urllist.add(url)
 
-for i in urllist:
-    if url[-3:] == "pdf":
-        wget.download(url)
-    else if url[-3:] == "html":
-        wget.download(url)
-    else if url[-1] == "/":
-        p = re.compile("(crd\d{4})")
-        m = p.match(url)
-        wget.download(url + m.group + ".pdf")
+for url in urllist:
+    filename = url.split("/")[-1]
+    if not os.path.isfile(filename):
+        time.sleep(1)
+        if url[-3:] == "pdf":
+            response = requests.get(url)
+            if not response.status_code > 400:
+                url = url.replace(" ","%20")
+                wget.download(url)
+                print("Downloading: " + url)
+            else:
+                print("404 for this guy: " + url)
+        elif url[-3:] == "html":
+            print(url)
+            response = requests.get(url)
+            if not response.status_code > 400:
+                url = url.replace(" ","%20")
+                wget.download(url)
+                print("Downloading: " + url)
+            else:
+                print("404 for this guy: " + url)
+        elif url[-1] == "/":
+            p = re.compile("(crd\d{4})")
+            m = p.search(url)
+            url = url + m.group() + ".pdf"
+            url = url.replace(" ","%20")
+            response = requests.get(url)
+            if not response.status_code > 400:
+                wget.download(url)
+                print("Downloading: " + url + "\n")
+            else:
+                print("404 for this guy: " + url)
+    
+                
 
 
 
